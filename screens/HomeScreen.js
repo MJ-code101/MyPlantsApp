@@ -22,15 +22,8 @@ const HomeScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonContainer: {
-    marginBottom: 20, // Add gap between buttons
-    width: '80%', // Make buttons wider
-  },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  buttonContainer: { marginBottom: 20, width: '80%' },
 });
 
 export default HomeScreen;
