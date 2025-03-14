@@ -1,6 +1,7 @@
 // screens/HomeScreen.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, Button, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import * as Location from 'expo-location'; // Import expo-location
 import { fetchWeatherData } from '../services/WeatherService'; // Import weather service
 
 const HomeScreen = ({ navigation }) => {
@@ -22,20 +23,34 @@ const HomeScreen = ({ navigation }) => {
     });
   }, []);
 
-  // Fetch weather data on component mount
+  // Fetch user location and weather data
   useEffect(() => {
-    const getWeather = async () => {
+    const getLocationAndWeather = async () => {
       try {
-        const data = await fetchWeatherData(37.7749, -122.4194); // Example coordinates (San Francisco)
-        setWeather(data);
+        // Request location permissions
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission Denied', 'Location permission is required to fetch weather data.');
+          setLoading(false);
+          return;
+        }
+
+        // Get the current position
+        const location = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = location.coords;
+
+        // Fetch weather data using the coordinates
+        const weatherData = await fetchWeatherData(latitude, longitude);
+        setWeather(weatherData);
       } catch (error) {
-        console.error('Error fetching weather data:', error);
+        console.error('Error fetching location or weather data:', error);
+        Alert.alert('Error', 'Unable to fetch location or weather data.');
       } finally {
         setLoading(false);
       }
     };
 
-    getWeather();
+    getLocationAndWeather();
   }, []);
 
   return (
