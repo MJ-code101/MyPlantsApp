@@ -1,12 +1,34 @@
 // screens/PlantListScreen.js
-import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { getFirestore, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { auth } from '../src/firebaseConfig';
+
+const db = getFirestore();
 
 const PlantListScreen = () => {
-  const plants = [
-    { id: '1', name: 'Rose', type: 'Flower', location: 'Garden', notes: 'Needs daily watering', dateAdded: '2023-10-01T12:00:00Z' },
-    { id: '2', name: 'Cactus', type: 'Succulent', location: 'Living Room', notes: 'Water once a week', dateAdded: '2023-10-02T12:00:00Z' },
-  ];
+  const [plants, setPlants] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    const q = query(collection(db, `users/${user.uid}/plants`));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const plantsData = [];
+      querySnapshot.forEach((doc) => {
+        plantsData.push({ id: doc.id, ...doc.data() });
+      });
+      setPlants(plantsData);
+      setLoading(false);
+    });
+
+    return () => unsubscribe(); // Cleanup listener
+  }, []);
 
   const renderItem = ({ item }) => (
     <View style={styles.item}>
@@ -20,20 +42,38 @@ const PlantListScreen = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={plants}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#007bff" />
+      ) : (
+        <FlatList
+          data={plants}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  item: { padding: 16, marginBottom: 8, backgroundColor: '#f9f9f9', borderRadius: 8 },
-  name: { fontSize: 18, fontWeight: 'bold' },
-  details: { fontSize: 14, color: '#555' },
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  item: {
+    padding: 16,
+    marginBottom: 8,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  details: {
+    fontSize: 14,
+    color: '#555',
+  },
 });
 
 export default PlantListScreen;

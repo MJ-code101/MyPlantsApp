@@ -3,6 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import * as Location from 'expo-location'; // Import expo-location
 import { fetchWeatherData } from '../services/WeatherService'; // Import weather service
+import { getFirestore, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { auth } from '../src/firebaseConfig';
+
+const db = getFirestore();
 
 const HomeScreen = ({ navigation }) => {
   const [weather, setWeather] = useState(null); // State for weather data
@@ -12,16 +16,6 @@ const HomeScreen = ({ navigation }) => {
     healthyPlants: 0,
     needsWater: 0,
   }); // State for plant health data
-
-  // Simulate fetching plant health data (replace with actual Firestore data later)
-  useEffect(() => {
-    // Mock plant health data
-    setPlantHealth({
-      totalPlants: 5,
-      healthyPlants: 3,
-      needsWater: 2,
-    });
-  }, []);
 
   // Fetch user location and weather data
   useEffect(() => {
@@ -51,6 +45,27 @@ const HomeScreen = ({ navigation }) => {
     };
 
     getLocationAndWeather();
+  }, []);
+
+  // Fetch plant data and calculate health metrics
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const q = query(collection(db, `users/${user.uid}/plants`));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const totalPlants = querySnapshot.size; // Total number of plants
+      const healthyPlants = querySnapshot.docs.filter((doc) => doc.data().healthStatus === 'healthy').length;
+      const needsWater = querySnapshot.docs.filter((doc) => doc.data().needsWater).length;
+
+      setPlantHealth({
+        totalPlants,
+        healthyPlants,
+        needsWater,
+      });
+    });
+
+    return () => unsubscribe(); // Cleanup listener
   }, []);
 
   return (
@@ -92,6 +107,12 @@ const HomeScreen = ({ navigation }) => {
         <Button
           title="Monitor Environment"
           onPress={() => navigation.navigate('Sensor')}
+        />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Add Plant"
+          onPress={() => navigation.navigate('AddPlant')}
         />
       </View>
     </View>
