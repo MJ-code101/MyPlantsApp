@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import * as Location from 'expo-location'; // Import expo-location
-import { fetchWeatherData } from '../services/WeatherService'; // Import weather service
+import { View, Text, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import { fetchWeatherData } from '../services/WeatherService';
+import { getAuth, signOut } from 'firebase/auth'; // Import Firebase signOut
 import { getFirestore, collection, query, onSnapshot } from 'firebase/firestore';
-import { auth } from '../src/firebaseConfig';
 
 const db = getFirestore();
+const auth = getAuth();
 
 const HomeScreen = ({ navigation }) => {
-  const [weather, setWeather] = useState(null); // State for weather data
-  const [loading, setLoading] = useState(true); // Loading state for weather fetch
+  const [weather, setWeather] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [plantHealth, setPlantHealth] = useState({
     totalPlants: 0,
     healthyPlants: 0,
     needsWater: 0,
-  }); // State for plant health data
+  });
 
   // Fetch user location and weather data
   useEffect(() => {
     const getLocationAndWeather = async () => {
       try {
-        // Request location permissions
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
           Alert.alert('Permission Denied', 'Location permission is required to fetch weather data.');
@@ -28,11 +29,9 @@ const HomeScreen = ({ navigation }) => {
           return;
         }
 
-        // Get the current position
         const location = await Location.getCurrentPositionAsync({});
         const { latitude, longitude } = location.coords;
 
-        // Fetch weather data using the coordinates
         const weatherData = await fetchWeatherData(latitude, longitude);
         setWeather(weatherData);
       } catch (error) {
@@ -53,25 +52,51 @@ const HomeScreen = ({ navigation }) => {
 
     const q = query(collection(db, `users/${user.uid}/plants`));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const totalPlants = querySnapshot.size; // Total number of plants
+      const totalPlants = querySnapshot.size;
       const healthyPlants = querySnapshot.docs.filter((doc) => doc.data().healthStatus === 'healthy').length;
       const needsWater = querySnapshot.docs.filter((doc) => doc.data().needsWater).length;
 
-      setPlantHealth({
-        totalPlants,
-        healthyPlants,
-        needsWater,
-      });
+      setPlantHealth({ totalPlants, healthyPlants, needsWater });
     });
 
-    return () => unsubscribe(); // Cleanup listener
+    return () => unsubscribe();
   }, []);
+
+  // Logout function
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout Confirmation",
+      "Are you sure you want to log out?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          onPress: async () => {
+            try {
+              await signOut(auth); // Firebase sign out
+              await AsyncStorage.removeItem('lastEmail'); // Remove saved email
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+              Alert.alert("Success", "You have logged out successfully.");
+            } catch (error) {
+              console.error("Logout Error:", error);
+              Alert.alert("Error", "Failed to log out.");
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to Plant Care Companion</Text>
 
-      {/* Plant Health Status */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Plants</Text>
         <Text>Total Plants: {plantHealth.totalPlants}</Text>
@@ -79,7 +104,6 @@ const HomeScreen = ({ navigation }) => {
         <Text>Needs Water: {plantHealth.needsWater}</Text>
       </View>
 
-      {/* Weather Updates */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Weather</Text>
         {loading ? (
@@ -95,54 +119,27 @@ const HomeScreen = ({ navigation }) => {
         )}
       </View>
 
-      {/* Quick Actions */}
       <View style={styles.buttonContainer}>
         <Button title="Go to Plant List" onPress={() => navigation.navigate('PlantList')} />
-      </View>
-      <View style={styles.buttonContainer}>
         <Button title="Monitor Environment" onPress={() => navigation.navigate('Sensor')} />
-      </View>
-      <View style={styles.buttonContainer}>
         <Button title="Add Plant" onPress={() => navigation.navigate('AddPlant')} />
-      </View>
-      <View style={styles.buttonContainer}>
         <Button title="Open Camera" onPress={() => navigation.navigate('Camera')} />
+      </View>
+
+      <View style={styles.logoutContainer}>
+        <Button title="Logout" onPress={handleLogout} color="red" />
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  section: {
-    marginBottom: 20,
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  buttonContainer: {
-    marginBottom: 12,
-  },
+  container: { flex: 1, padding: 16, backgroundColor: '#f9f9f9' },
+  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
+  section: { marginBottom: 20, padding: 16, backgroundColor: '#fff', borderRadius: 8 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
+  buttonContainer: { marginBottom: 12 },
+  logoutContainer: { marginTop: 20, alignSelf: 'center' },
 });
 
 export default HomeScreen;

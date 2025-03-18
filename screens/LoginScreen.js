@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, Text, TouchableOpacity } from 'react-native';
+import { Picker } from '@react-native-picker/picker'; // Import Picker for dropdown
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import { auth } from '../src/firebaseConfig';
@@ -7,41 +8,81 @@ import { auth } from '../src/firebaseConfig';
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [savedEmails, setSavedEmails] = useState([]); // Store multiple emails
 
-  // Load last logged-in email from AsyncStorage
+  // Load stored emails from AsyncStorage
   useEffect(() => {
-    const loadEmail = async () => {
+    const loadEmails = async () => {
       try {
-        const savedEmail = await AsyncStorage.getItem('lastEmail');
-        if (savedEmail) {
-          setEmail(savedEmail);
+        const storedEmails = await AsyncStorage.getItem('savedEmails');
+        if (storedEmails) {
+          const emailList = JSON.parse(storedEmails);
+          setSavedEmails(emailList);
         }
       } catch (error) {
-        console.error('Error loading email from storage:', error);
+        console.error('Error loading emails:', error);
       }
     };
-    loadEmail();
+
+    loadEmails();
+    setEmail(''); // Ensure email input is cleared on logout
+    setPassword(''); // Clear password field on screen load
   }, []);
+
+  // Save new email in AsyncStorage
+  const saveEmail = async (newEmail) => {
+    try {
+      const storedEmails = await AsyncStorage.getItem('savedEmails');
+      let emailList = storedEmails ? JSON.parse(storedEmails) : [];
+
+      if (!emailList.includes(newEmail)) {
+        emailList.push(newEmail); // Add new email only if not already stored
+        await AsyncStorage.setItem('savedEmails', JSON.stringify(emailList));
+      }
+    } catch (error) {
+      console.error('Error saving email:', error);
+    }
+  };
 
   // Handle user login
   const handleLogin = async () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then(async () => {
-        // Save the email in AsyncStorage
-        try {
-          await AsyncStorage.setItem('lastEmail', email);
-        } catch (error) {
-          console.error('Error saving email:', error);
-        }
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password.');
+      return;
+    }
 
-        navigation.navigate('Home');
-      })
-      .catch((error) => Alert.alert('Login Failed', error.message));
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      await saveEmail(email); // Save email to AsyncStorage
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    } catch (error) {
+      Alert.alert('Login Failed', error.message);
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Plant Care Companion</Text>
+
+      {/* Dropdown for past emails */}
+      {savedEmails.length > 0 && (
+        <Picker
+          selectedValue={email}
+          onValueChange={(selectedEmail) => setEmail(selectedEmail)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Select an email" value="" />
+          {savedEmails.map((storedEmail, index) => (
+            <Picker.Item key={index} label={storedEmail} value={storedEmail} />
+          ))}
+        </Picker>
+      )}
+
+      {/* Email Input */}
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -50,6 +91,8 @@ const LoginScreen = ({ navigation }) => {
         keyboardType="email-address"
         autoCapitalize="none"
       />
+
+      {/* Password Input */}
       <TextInput
         style={styles.input}
         placeholder="Password"
@@ -57,7 +100,11 @@ const LoginScreen = ({ navigation }) => {
         onChangeText={setPassword}
         secureTextEntry
       />
+
+      {/* Login Button */}
       <Button title="Login" onPress={handleLogin} />
+
+      {/* Sign-Up Link */}
       <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
         <Text style={styles.signupLink}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
@@ -70,6 +117,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
   input: { marginBottom: 12, padding: 12, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, backgroundColor: '#fff' },
   signupLink: { marginTop: 16, textAlign: 'center', color: '#007bff', textDecorationLine: 'underline' },
+  picker: { marginBottom: 12, backgroundColor: '#fff' },
 });
 
 export default LoginScreen;
