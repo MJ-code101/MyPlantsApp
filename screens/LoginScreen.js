@@ -1,16 +1,41 @@
-// screens/LoginScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, Text, TouchableOpacity } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth'; // Import Firebase auth methods
-import { auth } from '../src/firebaseConfig'; // Import auth from firebaseConfig
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import { auth } from '../src/firebaseConfig';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
+  // Load last logged-in email from AsyncStorage
+  useEffect(() => {
+    const loadEmail = async () => {
+      try {
+        const savedEmail = await AsyncStorage.getItem('lastEmail');
+        if (savedEmail) {
+          setEmail(savedEmail);
+        }
+      } catch (error) {
+        console.error('Error loading email from storage:', error);
+      }
+    };
+    loadEmail();
+  }, []);
+
+  // Handle user login
+  const handleLogin = async () => {
     signInWithEmailAndPassword(auth, email, password)
-      .then(() => navigation.navigate('Home'))
+      .then(async () => {
+        // Save the email in AsyncStorage
+        try {
+          await AsyncStorage.setItem('lastEmail', email);
+        } catch (error) {
+          console.error('Error saving email:', error);
+        }
+
+        navigation.navigate('Home');
+      })
       .catch((error) => Alert.alert('Login Failed', error.message));
   };
 
