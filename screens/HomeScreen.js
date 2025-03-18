@@ -1,9 +1,8 @@
-// screens/HomeScreen.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import * as Location from 'expo-location'; // Import expo-location
 import { fetchWeatherData } from '../services/WeatherService'; // Import weather service
-import { getFirestore, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, query, onSnapshot } from 'firebase/firestore';
 import { auth } from '../src/firebaseConfig';
 
 const db = getFirestore();
@@ -98,22 +97,16 @@ const HomeScreen = ({ navigation }) => {
 
       {/* Quick Actions */}
       <View style={styles.buttonContainer}>
-        <Button
-          title="Go to Plant List"
-          onPress={() => navigation.navigate('PlantList')}
-        />
+        <Button title="Go to Plant List" onPress={() => navigation.navigate('PlantList')} />
       </View>
       <View style={styles.buttonContainer}>
-        <Button
-          title="Monitor Environment"
-          onPress={() => navigation.navigate('Sensor')}
-        />
+        <Button title="Monitor Environment" onPress={() => navigation.navigate('Sensor')} />
       </View>
       <View style={styles.buttonContainer}>
-        <Button
-          title="Add Plant"
-          onPress={() => navigation.navigate('AddPlant')}
-        />
+        <Button title="Add Plant" onPress={() => navigation.navigate('AddPlant')} />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button title="Open Camera" onPress={() => navigation.navigate('Camera')} />
       </View>
     </View>
   );

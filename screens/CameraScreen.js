@@ -1,49 +1,40 @@
-// screens/CameraScreen.js
-import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, Image, ActivityIndicator, Alert, StyleSheet } from 'react-native';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 
-const PLANT_ID_API_KEY = 'anDOM0hXjzcXfK7YbhGxIFcYzGjXxxvJs0oDfzUZni5m9xJziL'; 
+const PLANT_ID_API_KEY = 'anDOM0hXjzcXfK7YbhGxIFcYzGjXxxvJs0oDfzUZni5m9xJziL';
 
 const CameraScreen = ({ navigation }) => {
-  const [hasPermission, setHasPermission] = useState(null);
+  const [hasCameraPermission, setHasCameraPermission] = useState(null);
+  const [hasGalleryPermission, setHasGalleryPermission] = useState(null);
   const [imageUri, setImageUri] = useState(null);
   const [loading, setLoading] = useState(false);
   const [plantInfo, setPlantInfo] = useState(null);
 
-  // Request camera permissions
+  // Request permissions for Camera and Gallery
   useEffect(() => {
-    const requestPermissions = async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    };
-    requestPermissions();
+    (async () => {
+      const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
+      const { status: galleryStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      setHasCameraPermission(cameraStatus === 'granted');
+      setHasGalleryPermission(galleryStatus === 'granted');
+    })();
   }, []);
 
-  if (hasPermission === null) {
-    return <Text>Requesting camera permissions...</Text>;
+  if (hasCameraPermission === null || hasGalleryPermission === null) {
+    return <Text>Requesting permissions...</Text>;
   }
-  if (hasPermission === false) {
+  if (!hasCameraPermission) {
     return <Text>No access to camera</Text>;
   }
+  if (!hasGalleryPermission) {
+    return <Text>No access to gallery</Text>;
+  }
 
-  // Function to pick an image from the gallery
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImageUri(result.assets[0].uri); // Set the image URI
-    }
-  };
-
-  // Function to take a photo using the camera
+  // Take a photo
   const takePhoto = async () => {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -53,11 +44,25 @@ const CameraScreen = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri); // Set the image URI
+      setImageUri(result.assets[0].uri);
     }
   };
 
-  // Function to identify the plant using Plant.id API
+  // Pick from gallery
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  // Identify plant using Plant.id API
   const identifyPlant = async () => {
     if (!imageUri) {
       Alert.alert('Error', 'Please select or take a photo first.');
@@ -83,9 +88,8 @@ const CameraScreen = ({ navigation }) => {
         },
       });
 
-      const suggestions = response.data.suggestions;
-      if (suggestions.length > 0) {
-        setPlantInfo(suggestions[0]); // Display the top suggestion
+      if (response.data.suggestions.length > 0) {
+        setPlantInfo(response.data.suggestions[0]);
       } else {
         Alert.alert('No Results', 'Could not identify the plant.');
       }
@@ -101,24 +105,12 @@ const CameraScreen = ({ navigation }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Plant Identification</Text>
 
-      {imageUri ? (
-        <View style={styles.imageContainer}>
-          <Text style={styles.label}>Selected Image:</Text>
-          <Text>{imageUri}</Text>
-        </View>
-      ) : (
-        <Text style={styles.label}>No image selected</Text>
-      )}
+      {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
 
-      <View style={styles.buttonContainer}>
-        <Button title="Take Photo" onPress={takePhoto} />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button title="Pick from Gallery" onPress={pickImage} />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button title="Identify Plant" onPress={identifyPlant} disabled={loading} />
-      </View>
+      <Button title="Take Photo" onPress={takePhoto} />
+      <Button title="Pick from Gallery" onPress={pickImage} />
+      <Button title="Identify Plant" onPress={identifyPlant} disabled={loading} />
+      <Button title="Go Back" onPress={() => navigation.goBack()} />
 
       {loading && <ActivityIndicator size="large" color="#007bff" />}
 
@@ -137,40 +129,11 @@ const CameraScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  buttonContainer: {
-    marginBottom: 12,
-  },
-  imageContainer: {
-    marginBottom: 20,
-  },
-  resultContainer: {
-    marginTop: 20,
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
+  container: { flex: 1, padding: 16, backgroundColor: '#f9f9f9' },
+  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
+  image: { width: 200, height: 200, alignSelf: 'center', marginBottom: 20 },
+  resultContainer: { marginTop: 20, padding: 16, backgroundColor: '#fff', borderRadius: 8 },
+  label: { fontSize: 16, fontWeight: 'bold', marginTop: 12, marginBottom: 8 },
 });
 
 export default CameraScreen;
