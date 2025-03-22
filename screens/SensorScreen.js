@@ -11,7 +11,7 @@ const SensorScreen = () => {
   const [lightData, setLightData] = useState([]);
   const [loading, setLoading] = useState(true); // Show loading until data is fetched
   const isAlertActive = useRef(false);
-  const tempThreshold = { min: 20, max: 25 };
+  const tempThreshold = { min: 0, max: 30 };
 
   useEffect(() => {
     const getWeatherData = async () => {

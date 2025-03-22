@@ -1,12 +1,13 @@
+// In PlantListScreen.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { getFirestore, collection, query, onSnapshot } from 'firebase/firestore';
 import { auth } from '../src/firebaseConfig';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const db = getFirestore();
 
-const PlantListScreen = () => {
+const PlantListScreen = ({ navigation }) => {
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,43 +27,18 @@ const PlantListScreen = () => {
 
       setPlants(plantsData);
       setLoading(false);
-
-      // Save plant data to AsyncStorage for offline access
-      try {
-        await AsyncStorage.setItem('cachedPlants', JSON.stringify(plantsData));
-      } catch (error) {
-        console.error('Error saving plant data:', error);
-      }
+      await AsyncStorage.setItem('cachedPlants', JSON.stringify(plantsData));
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Load cached data when offline
-  useEffect(() => {
-    const loadCachedData = async () => {
-      try {
-        const cachedData = await AsyncStorage.getItem('cachedPlants');
-        if (cachedData) {
-          setPlants(JSON.parse(cachedData));
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error('Error loading cached plant data:', error);
-      }
-    };
-
-    loadCachedData();
-  }, []);
-
   const renderItem = ({ item }) => (
-    <View style={styles.item}>
+    <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('PlantDetails', { plant: item })}>
       <Text style={styles.name}>{item.name}</Text>
       <Text style={styles.details}>Type: {item.type}</Text>
       <Text style={styles.details}>Location: {item.location}</Text>
-      {item.notes && <Text style={styles.details}>Notes: {item.notes}</Text>}
-      <Text style={styles.details}>Date Added: {new Date(item.dateAdded).toLocaleString()}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -70,11 +46,7 @@ const PlantListScreen = () => {
       {loading ? (
         <ActivityIndicator size="large" color="#007bff" />
       ) : (
-        <FlatList
-          data={plants}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-        />
+        <FlatList data={plants} renderItem={renderItem} keyExtractor={(item) => item.id} />
       )}
     </View>
   );

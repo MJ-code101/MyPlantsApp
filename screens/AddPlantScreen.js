@@ -1,18 +1,31 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  Text,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { auth } from '../src/firebaseConfig';
 
 const db = getFirestore();
 
-const AddPlantScreen = ({ navigation }) => {
-  const [name, setName] = useState('');
-  const [type, setType] = useState('');
+const AddPlantScreen = ({ navigation, route }) => {
+  const prefillData = route?.params?.prefillData || {};
+
+  const [name, setName] = useState(prefillData.name || '');
+  const [type, setType] = useState(prefillData.type || '');
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
   const [healthStatus, setHealthStatus] = useState('healthy');
   const [needsWater, setNeedsWater] = useState('no');
+  const [suggestedRepeatDays, setSuggestedRepeatDays] = useState(prefillData.suggestedRepeatDays || '3');
 
   const handleAddPlant = async () => {
     if (!name || !type || !location) {
@@ -27,7 +40,7 @@ const AddPlantScreen = ({ navigation }) => {
     }
 
     try {
-      await addDoc(collection(db, `users/${user.uid}/plants`), {
+      const newPlantRef = await addDoc(collection(db, `users/${user.uid}/plants`), {
         name,
         type,
         location,
@@ -38,7 +51,23 @@ const AddPlantScreen = ({ navigation }) => {
       });
 
       Alert.alert('Success', 'Plant added successfully!');
-      navigation.goBack();
+
+      if (needsWater === 'yes') {
+        navigation.navigate('PlantDetails', {
+          plant: {
+            id: newPlantRef.id,
+            name,
+            type,
+            location,
+            notes,
+            healthStatus,
+            needsWater: true,
+          },
+          suggestedRepeatDays,
+        });
+      } else {
+        navigation.navigate('PlantList'); // or 'Home' if you want
+      }
     } catch (error) {
       console.error('Error adding plant:', error);
       Alert.alert('Error', 'Failed to add plant.');
@@ -46,8 +75,8 @@ const AddPlantScreen = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"} 
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -106,41 +135,41 @@ const AddPlantScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#f9f9f9' 
+  container: {
+    flex: 1,
+    backgroundColor: '#f9f9f9',
   },
-  scrollContainer: { 
-    padding: 16, 
-    paddingBottom: 50 // Ensures space for the button on small screens
+  scrollContainer: {
+    padding: 16,
+    paddingBottom: 50,
   },
-  title: { 
-    fontSize: 24, 
-    fontWeight: 'bold', 
-    textAlign: 'center', 
-    marginBottom: 20 
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
   },
-  input: { 
-    marginBottom: 12, 
-    padding: 12, 
-    borderWidth: 1, 
-    borderColor: '#ccc', 
-    borderRadius: 8, 
-    backgroundColor: '#fff' 
+  input: {
+    marginBottom: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#fff',
   },
-  label: { 
-    fontSize: 16, 
-    fontWeight: 'bold', 
-    marginTop: 12, 
-    marginBottom: 8 
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 12,
+    marginBottom: 8,
   },
-  picker: { 
-    marginBottom: 12, 
-    padding: 8, 
-    borderWidth: 1, 
-    borderColor: '#ccc', 
-    borderRadius: 8, 
-    backgroundColor: '#fff' 
+  picker: {
+    marginBottom: 12,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#fff',
   },
 });
 
