@@ -1,6 +1,13 @@
-// In PlantListScreen.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 import { getFirestore, collection, query, onSnapshot } from 'firebase/firestore';
 import { auth } from '../src/firebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -27,6 +34,7 @@ const PlantListScreen = ({ navigation }) => {
 
       setPlants(plantsData);
       setLoading(false);
+
       await AsyncStorage.setItem('cachedPlants', JSON.stringify(plantsData));
     });
 
@@ -34,10 +42,23 @@ const PlantListScreen = ({ navigation }) => {
   }, []);
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('PlantDetails', { plant: item })}>
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.details}>Type: {item.type}</Text>
-      <Text style={styles.details}>Location: {item.location}</Text>
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() => navigation.navigate('PlantDetails', { plant: item })}
+    >
+      {item.imageUri ? (
+        <Image source={{ uri: item.imageUri }} style={styles.thumbnail} />
+      ) : (
+        <View style={styles.noImage}>
+          <Text style={styles.noImageText}>No Image</Text>
+        </View>
+      )}
+
+      <View style={styles.detailsContainer}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.details}>Type: {item.type}</Text>
+        <Text style={styles.details}>Location: {item.location}</Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -54,7 +75,37 @@ const PlantListScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
-  item: { padding: 16, marginBottom: 8, backgroundColor: '#f9f9f9', borderRadius: 8 },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    marginBottom: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    elevation: 1,
+  },
+  thumbnail: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  noImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    backgroundColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  noImageText: {
+    fontSize: 12,
+    color: '#555',
+  },
+  detailsContainer: {
+    flex: 1,
+  },
   name: { fontSize: 18, fontWeight: 'bold' },
   details: { fontSize: 14, color: '#555' },
 });

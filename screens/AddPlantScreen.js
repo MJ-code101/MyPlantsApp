@@ -9,7 +9,10 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  TouchableOpacity,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { auth } from '../src/firebaseConfig';
@@ -23,9 +26,12 @@ const AddPlantScreen = ({ navigation, route }) => {
   const [type, setType] = useState(prefillData.type || '');
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
+  const [imageUri, setImageUri] = useState('');
   const [healthStatus, setHealthStatus] = useState('healthy');
   const [needsWater, setNeedsWater] = useState('no');
-  const [suggestedRepeatDays, setSuggestedRepeatDays] = useState(prefillData.suggestedRepeatDays || '3');
+  const [suggestedRepeatDays, setSuggestedRepeatDays] = useState(
+    prefillData.suggestedRepeatDays || '3'
+  );
 
   const handleAddPlant = async () => {
     if (!name || !type || !location) {
@@ -48,6 +54,7 @@ const AddPlantScreen = ({ navigation, route }) => {
         healthStatus,
         needsWater: needsWater === 'yes',
         dateAdded: new Date().toISOString(),
+        imageUri: imageUri || '', // ✅ save image URI
       });
 
       Alert.alert('Success', 'Plant added successfully!');
@@ -62,15 +69,35 @@ const AddPlantScreen = ({ navigation, route }) => {
             notes,
             healthStatus,
             needsWater: true,
+            imageUri: imageUri || '',
           },
           suggestedRepeatDays,
         });
       } else {
-        navigation.navigate('PlantList'); // or 'Home' if you want
+        navigation.navigate('PlantList');
       }
     } catch (error) {
       console.error('Error adding plant:', error);
       Alert.alert('Error', 'Failed to add plant.');
+    }
+  };
+
+  const handlePickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert('Permission Denied', 'Camera roll access is required.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
     }
   };
 
@@ -81,6 +108,14 @@ const AddPlantScreen = ({ navigation, route }) => {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Add a New Plant</Text>
+
+        <TouchableOpacity onPress={handlePickImage} style={styles.imagePicker}>
+          {imageUri ? (
+            <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+          ) : (
+            <Text style={styles.imagePlaceholder}>📷 Tap to select image</Text>
+          )}
+        </TouchableOpacity>
 
         <TextInput
           style={styles.input}
@@ -170,6 +205,26 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 8,
     backgroundColor: '#fff',
+  },
+  imagePicker: {
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  imagePreview: {
+    width: 160,
+    height: 160,
+    borderRadius: 10,
+    resizeMode: 'cover',
+  },
+  imagePlaceholder: {
+    fontSize: 16,
+    color: '#888',
+    backgroundColor: '#e0e0e0',
+    padding: 50,
+    borderRadius: 10,
+    textAlign: 'center',
+    width: 160,
+    height: 160,
   },
 });
 

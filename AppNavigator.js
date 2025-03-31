@@ -1,4 +1,3 @@
-// AppNavigator.js
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -10,11 +9,11 @@ import LoginScreen from './screens/LoginScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import HomeScreen from './screens/HomeScreen';
 import PlantListScreen from './screens/PlantListScreen';
-import SensorScreen from './screens/SensorScreen';
 import AddPlantScreen from './screens/AddPlantScreen';
 import CameraScreen from './screens/CameraScreen';
 import SaveIdentifiedPlantScreen from './screens/SaveIdentifiedPlantScreen';
 import PlantDetailsScreen from './screens/PlantDetailsScreen';
+import CareLogsScreen from './screens/CareLogsScreen'; // ✅ New
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -40,9 +39,6 @@ function MainTabs() {
             case 'Camera':
               iconName = focused ? 'camera' : 'camera-outline';
               break;
-            case 'Sensor':
-              iconName = focused ? 'analytics' : 'analytics-outline';
-              break;
             default:
               iconName = 'ellipse-outline';
           }
@@ -58,7 +54,6 @@ function MainTabs() {
       <Tab.Screen name="PlantList" component={PlantListScreen} />
       <Tab.Screen name="AddPlant" component={AddPlantScreen} />
       <Tab.Screen name="Camera" component={CameraScreen} />
-      <Tab.Screen name="Sensor" component={SensorScreen} />
     </Tab.Navigator>
   );
 }
@@ -73,6 +68,7 @@ export default function AppNavigator() {
         <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
         <Stack.Screen name="SaveIdentifiedPlant" component={SaveIdentifiedPlantScreen} />
         <Stack.Screen name="PlantDetails" component={PlantDetailsScreen} />
+        <Stack.Screen name="CareLogs" component={CareLogsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -13,21 +13,21 @@ import * as Notifications from 'expo-notifications';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 
-const PlantDetailsScreen = ({ route }) => {
+const PlantDetailsScreen = ({ route, navigation }) => {
   const plant = route?.params?.plant;
+  const suggestedRepeatDays = route?.params?.suggestedRepeatDays || '3';
 
   const [reminderSet, setReminderSet] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
-  const [repeatDays, setRepeatDays] = useState('1');
+  const [repeatDays, setRepeatDays] = useState(suggestedRepeatDays);
   const [showRepeatModal, setShowRepeatModal] = useState(false);
 
   const notificationListener = useRef();
 
   useEffect(() => {
-    // Listen for when user interacts with the notification
     notificationListener.current = Notifications.addNotificationResponseReceivedListener(() => {
-      scheduleNextNotification(); // 🔁 Auto-reschedule on tap
+      scheduleNextNotification();
     });
 
     return () => {
@@ -57,7 +57,7 @@ const PlantDetailsScreen = ({ route }) => {
   };
 
   const scheduleNotification = async () => {
-    const triggerTime = calculateNextTriggerDate(0); // first time
+    const triggerTime = calculateNextTriggerDate(0);
     try {
       await Notifications.scheduleNotificationAsync({
         content: {
@@ -146,7 +146,7 @@ const PlantDetailsScreen = ({ route }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Modal for Repeat Picker */}
+      {/* Repeat Days Modal */}
       <Modal
         visible={showRepeatModal}
         transparent
@@ -183,6 +183,18 @@ const PlantDetailsScreen = ({ route }) => {
           🔔 Reminder set for {formatTime(selectedTime)} every {repeatDays} day(s)!
         </Text>
       )}
+
+      <View style={{ marginTop: 20 }}>
+        <Button
+          title="View Care Logs"
+          onPress={() =>
+            navigation.navigate('CareLogs', {
+              plantId: plant.id,
+              plantName: plant.name,
+            })
+          }
+        />
+      </View>
     </View>
   );
 };
