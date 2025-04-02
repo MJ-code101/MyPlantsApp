@@ -12,22 +12,24 @@ import {
 import * as Notifications from 'expo-notifications';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';
 
-const PlantDetailsScreen = ({ route, navigation }) => {
+const PlantDetailsScreen = ({ route }) => {
+  const navigation = useNavigation();
   const plant = route?.params?.plant;
-  const suggestedRepeatDays = route?.params?.suggestedRepeatDays || '3';
 
   const [reminderSet, setReminderSet] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
-  const [repeatDays, setRepeatDays] = useState(suggestedRepeatDays);
+  const [repeatDays, setRepeatDays] = useState('1');
   const [showRepeatModal, setShowRepeatModal] = useState(false);
 
   const notificationListener = useRef();
 
   useEffect(() => {
+    // Listen for when user interacts with the notification
     notificationListener.current = Notifications.addNotificationResponseReceivedListener(() => {
-      scheduleNextNotification();
+      scheduleNextNotification(); // 🔁 Auto-reschedule on tap
     });
 
     return () => {
@@ -146,7 +148,7 @@ const PlantDetailsScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Repeat Days Modal */}
+      {/* Modal for Repeat Picker */}
       <Modal
         visible={showRepeatModal}
         transparent
@@ -184,17 +186,17 @@ const PlantDetailsScreen = ({ route, navigation }) => {
         </Text>
       )}
 
-      <View style={{ marginTop: 20 }}>
-        <Button
-          title="View Care Logs"
-          onPress={() =>
-            navigation.navigate('CareLogs', {
-              plantId: plant.id,
-              plantName: plant.name,
-            })
-          }
-        />
-      </View>
+      <TouchableOpacity
+        style={styles.logButton}
+        onPress={() =>
+          navigation.navigate('CareLogs', {
+            plantId: plant.id,
+            plantName: plant.name,
+          })
+        }
+      >
+        <Text style={styles.logButtonText}>📘 View Care Logs</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -245,6 +247,19 @@ const styles = StyleSheet.create({
   picker: {
     height: 180,
     width: '100%',
+  },
+
+  logButton: {
+    backgroundColor: '#2e7d32',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  logButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

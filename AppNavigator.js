@@ -1,3 +1,4 @@
+// AppNavigator.js
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -13,7 +14,7 @@ import AddPlantScreen from './screens/AddPlantScreen';
 import CameraScreen from './screens/CameraScreen';
 import SaveIdentifiedPlantScreen from './screens/SaveIdentifiedPlantScreen';
 import PlantDetailsScreen from './screens/PlantDetailsScreen';
-import CareLogsScreen from './screens/CareLogsScreen'; // ✅ New
+import CareLogsScreen from './screens/CareLogsScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();

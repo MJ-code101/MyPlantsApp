@@ -6,6 +6,8 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
+  TouchableOpacity,
+  Linking,
 } from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -163,6 +165,17 @@ const HomeScreen = ({ navigation }) => {
         </View>
       )}
 
+      <View style={styles.mapButtonContainer}>
+        <TouchableOpacity
+          style={styles.mapButton}
+          onPress={() =>
+            Linking.openURL('https://www.google.com/maps/search/plant+store+near+me/')
+          }
+        >
+          <Text style={styles.mapButtonText}>🗺️ Find Nearby Plant Stores</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.logoutContainer}>
         <Text style={styles.logoutText} onPress={handleLogout}>
           🚪 Logout
@@ -225,6 +238,21 @@ const styles = StyleSheet.create({
     color: 'red',
     fontWeight: 'bold',
     textDecorationLine: 'underline',
+  },
+  mapButtonContainer: {
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  mapButton: {
+    backgroundColor: '#34a853',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  mapButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
