@@ -1,7 +1,7 @@
 // services/WeatherService.js
 import axios from 'axios';
 
-const API_KEY = 'bd5e378503939ddaee76f12ad7a97608'; 
+const API_KEY = '245340e6525d0a19b36ab6506232bd8e'; 
 
 export const fetchWeatherData = async (latitude, longitude) => {
   try {

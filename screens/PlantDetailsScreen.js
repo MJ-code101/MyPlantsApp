@@ -8,6 +8,7 @@ import {
   Platform,
   TouchableOpacity,
   Modal,
+  ScrollView,
 } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -27,9 +28,8 @@ const PlantDetailsScreen = ({ route }) => {
   const notificationListener = useRef();
 
   useEffect(() => {
-    // Listen for when user interacts with the notification
     notificationListener.current = Notifications.addNotificationResponseReceivedListener(() => {
-      scheduleNextNotification(); // 🔁 Auto-reschedule on tap
+      scheduleNextNotification();
     });
 
     return () => {
@@ -70,10 +70,7 @@ const PlantDetailsScreen = ({ route }) => {
       });
 
       setReminderSet(true);
-      Alert.alert(
-        'Success',
-        `Reminder set for ${formatTime(triggerTime)} every ${repeatDays} day(s).`
-      );
+      Alert.alert('Success', `Reminder set for ${formatTime(triggerTime)} every ${repeatDays} day(s).`);
     } catch (error) {
       console.error('Notification error:', error);
       Alert.alert('Error', 'Failed to schedule reminder.');
@@ -114,7 +111,7 @@ const PlantDetailsScreen = ({ route }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>{plant.name}</Text>
 
       <View style={styles.section}>
@@ -148,7 +145,6 @@ const PlantDetailsScreen = ({ route }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Modal for Repeat Picker */}
       <Modal
         visible={showRepeatModal}
         transparent
@@ -197,14 +193,24 @@ const PlantDetailsScreen = ({ route }) => {
       >
         <Text style={styles.logButtonText}>📘 View Care Logs</Text>
       </TouchableOpacity>
-    </View>
+
+      <TouchableOpacity
+        style={styles.logButton}
+        onPress={() =>
+          navigation.navigate('PlantInstructions', {
+            plant,
+          })
+        }
+      >
+        <Text style={styles.logButtonText}>📘 View Instructions</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#f5f9f7' },
+  container: { flexGrow: 1, padding: 20, backgroundColor: '#f5f9f7' },
   title: { fontSize: 26, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
-
   section: {
     backgroundColor: '#fff',
     borderRadius: 10,
@@ -212,11 +218,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     elevation: 1,
   },
-
   label: { fontSize: 16, fontWeight: 'bold', marginBottom: 6 },
   value: { fontWeight: 'normal', color: '#333' },
   subHeading: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
-
   optionButton: {
     backgroundColor: '#007bff',
     padding: 12,
@@ -224,14 +228,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   optionButtonText: { color: '#fff', fontSize: 16 },
-
   confirmation: {
     marginTop: 16,
     fontSize: 16,
     color: 'green',
     textAlign: 'center',
   },
-
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
@@ -248,7 +250,6 @@ const styles = StyleSheet.create({
     height: 180,
     width: '100%',
   },
-
   logButton: {
     backgroundColor: '#2e7d32',
     padding: 14,

@@ -15,6 +15,7 @@ import CameraScreen from './screens/CameraScreen';
 import SaveIdentifiedPlantScreen from './screens/SaveIdentifiedPlantScreen';
 import PlantDetailsScreen from './screens/PlantDetailsScreen';
 import CareLogsScreen from './screens/CareLogsScreen';
+import PlantInstructionsScreen from './screens/PlantInstructionsScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -70,6 +71,7 @@ export default function AppNavigator() {
         <Stack.Screen name="SaveIdentifiedPlant" component={SaveIdentifiedPlantScreen} />
         <Stack.Screen name="PlantDetails" component={PlantDetailsScreen} />
         <Stack.Screen name="CareLogs" component={CareLogsScreen} />
+        <Stack.Screen name="PlantInstructions" component={PlantInstructionsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
