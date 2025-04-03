@@ -202,7 +202,7 @@ const PlantDetailsScreen = ({ route }) => {
           })
         }
       >
-        <Text style={styles.logButtonText}>📘 View Instructions</Text>
+        <Text style={styles.logButtonText}>📘 View Care Instructions</Text>
       </TouchableOpacity>
     </ScrollView>
   );

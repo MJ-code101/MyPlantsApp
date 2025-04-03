@@ -7,8 +7,16 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  Alert,
 } from 'react-native';
-import { getFirestore, collection, query, onSnapshot } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  query,
+  onSnapshot,
+  deleteDoc,
+  doc,
+} from 'firebase/firestore';
 import { auth } from '../src/firebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -41,10 +49,35 @@ const PlantListScreen = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
+  const handleDelete = (plantId) => {
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to delete this plant?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const user = auth.currentUser;
+              await deleteDoc(doc(db, `users/${user.uid}/plants/${plantId}`));
+              Alert.alert('Deleted', 'Plant removed successfully.');
+            } catch (error) {
+              console.error('Error deleting plant:', error);
+              Alert.alert('Error', 'Failed to delete plant.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.item}
       onPress={() => navigation.navigate('PlantDetails', { plant: item })}
+      onLongPress={() => handleDelete(item.id)}
     >
       {item.imageUri ? (
         <Image source={{ uri: item.imageUri }} style={styles.thumbnail} />
@@ -67,7 +100,11 @@ const PlantListScreen = ({ navigation }) => {
       {loading ? (
         <ActivityIndicator size="large" color="#007bff" />
       ) : (
-        <FlatList data={plants} renderItem={renderItem} keyExtractor={(item) => item.id} />
+        <FlatList
+          data={plants}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+        />
       )}
     </View>
   );

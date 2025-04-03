@@ -1,4 +1,3 @@
-// CameraScreen.js
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -52,7 +51,7 @@ const CameraScreen = ({ navigation }) => {
       const uri = result.assets[0].uri;
 
       try {
-        await MediaLibrary.createAssetAsync(uri); // Save to phone gallery
+        await MediaLibrary.createAssetAsync(uri);
         console.log('✅ Photo saved to gallery');
       } catch (err) {
         console.warn('Could not save photo:', err);
@@ -69,6 +68,7 @@ const CameraScreen = ({ navigation }) => {
       aspect: [4, 3],
       quality: 1,
     });
+
     if (!result.canceled) {
       setImageUri(result.assets[0].uri);
     }
@@ -76,7 +76,7 @@ const CameraScreen = ({ navigation }) => {
 
   const identifyPlant = async () => {
     if (!imageUri) return Alert.alert('Please select or take a photo.');
-  
+
     setLoading(true);
     try {
       const formData = new FormData();
@@ -88,15 +88,14 @@ const CameraScreen = ({ navigation }) => {
       formData.append('modifiers', ['crops_fast', 'similar_images']);
       formData.append('language', 'en');
       formData.append('api_key', PLANT_ID_API_KEY);
-  
+
       const response = await axios.post('https://api.plant.id/v2/identify', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-  
+
       const suggestions = response.data?.suggestions;
       const bestMatch = suggestions?.[0];
-  
-      // Only continue if confident match
+
       if (
         bestMatch &&
         bestMatch.probability >= 0.1 &&
@@ -106,11 +105,11 @@ const CameraScreen = ({ navigation }) => {
         const name = bestMatch.plant_name;
         const type = bestMatch.plant_details.common_names?.[0] || 'Indoor Plant';
         const watering = bestMatch.plant_details.watering || 'average';
-  
+
         let suggestedRepeatDays = '3';
         if (watering === 'frequent') suggestedRepeatDays = '1';
         else if (watering === 'minimum') suggestedRepeatDays = '7';
-  
+
         navigation.navigate('AddPlant', {
           prefillData: {
             name,
@@ -127,24 +126,49 @@ const CameraScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Identify a Plant</Text>
+
       {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
-      <Button title="Take Photo" onPress={takePhoto} />
-      <Button title="Pick from Gallery" onPress={pickImage} />
-      <Button title="Identify Plant" onPress={identifyPlant} disabled={loading} />
-      {loading && <ActivityIndicator size="large" color="#007bff" />}
+
+      <View style={styles.buttonGroup}>
+        <Button title="Take Photo" onPress={takePhoto} />
+        <Button title="Pick from Gallery" onPress={pickImage} />
+        <Button title="Identify Plant" onPress={identifyPlant} disabled={loading} />
+      </View>
+
+      {loading && <ActivityIndicator size="large" color="#007bff" style={{ marginTop: 20 }} />}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f9f9f9' },
-  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
-  image: { width: 200, height: 200, alignSelf: 'center', marginBottom: 20 },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f9f9f9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  image: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  buttonGroup: {
+    width: '100%',
+    gap: 12,
+  },
 });
 
 export default CameraScreen;

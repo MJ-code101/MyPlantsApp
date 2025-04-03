@@ -71,7 +71,10 @@ export default function AppNavigator() {
         <Stack.Screen name="SaveIdentifiedPlant" component={SaveIdentifiedPlantScreen} />
         <Stack.Screen name="PlantDetails" component={PlantDetailsScreen} />
         <Stack.Screen name="CareLogs" component={CareLogsScreen} />
-        <Stack.Screen name="PlantInstructions" component={PlantInstructionsScreen} />
+        <Stack.Screen
+  name="PlantInstructions"
+  component={PlantInstructionsScreen}
+  options={{ title: 'Care Instructions', headerBackTitle: 'Back' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
