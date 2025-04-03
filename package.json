@@ -26,6 +26,7 @@
     "expo-media-library": "~17.0.6",
     "expo-notifications": "~0.29.14",
     "expo-sensors": "~14.0.2",
+    "expo-splash-screen": "~0.29.22",
     "expo-sqlite": "~15.1.2",
     "expo-status-bar": "~2.0.1",
     "firebase": "^11.4.0",
