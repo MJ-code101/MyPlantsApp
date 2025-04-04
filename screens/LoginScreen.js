@@ -113,7 +113,10 @@ const LoginScreen = ({ navigation }) => {
             secureTextEntry
           />
 
-          <Button title="Login" onPress={handleLogin} />
+<TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+  <Text style={styles.loginButtonText}>Login</Text>
+</TouchableOpacity>
+
 
           <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
             <Text style={styles.signupLink}>Don't have an account? Sign Up</Text>
@@ -128,7 +131,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     paddingBottom: 40,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f0f8e4',
     flexGrow: 1,
     justifyContent: 'center',
   },
@@ -154,8 +157,22 @@ const styles = StyleSheet.create({
   },
   picker: {
     marginBottom: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#f0f8e4',
   },
+  loginButton: {
+    backgroundColor: '#2e7d32',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  
+  loginButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  
 });
 
 export default LoginScreen;

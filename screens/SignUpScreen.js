@@ -46,7 +46,10 @@ const SignUpScreen = ({ navigation }) => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Sign Up" onPress={handleSignUp} />
+     <TouchableOpacity style={styles.signupButton} onPress={handleSignUp}>
+  <Text style={styles.signupButtonText}>Sign Up</Text>
+</TouchableOpacity>
+
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
         <Text style={styles.loginLink}>Already have an account? Login</Text>
       </TouchableOpacity>
@@ -59,7 +62,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f0f8e4',
   },
   title: {
     fontSize: 24,
@@ -81,6 +84,20 @@ const styles = StyleSheet.create({
     color: '#007bff',
     textDecorationLine: 'underline',
   },
+  signupButton: {
+    backgroundColor: '#2e7d32',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  
+  signupButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  
 });
 
 export default SignUpScreen;

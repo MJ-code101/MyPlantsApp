@@ -100,11 +100,17 @@ const PlantListScreen = ({ navigation }) => {
       {loading ? (
         <ActivityIndicator size="large" color="#007bff" />
       ) : (
-        <FlatList
-          data={plants}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-        />
+        <>
+          <Text style={styles.deleteHint}>
+            📌 Tip: Long press a plant to delete it from your list.
+          </Text>
+
+          <FlatList
+            data={plants}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+          />
+        </>
       )}
     </View>
   );
@@ -120,7 +126,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     borderRadius: 10,
     elevation: 1,
+    borderWidth: 1.5,
+    borderColor: '#d4d2d2',
   },
+  
   thumbnail: {
     width: 70,
     height: 70,
@@ -142,6 +151,13 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     flex: 1,
+  },
+  deleteHint: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 20,
+    marginBottom: 12,
+    textAlign: 'center',
   },
   name: { fontSize: 18, fontWeight: 'bold' },
   details: { fontSize: 14, color: '#555' },
