@@ -13,7 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import axios from 'axios';
 
-const PLANT_ID_API_KEY = 'anDOM0hXjzcXfK7YbhGxIFcYzGjXxxvJs0oDfzUZni5m9xJziL';
+const PLANT_ID_API_KEY = 'anDOM0hXjzcXfK7YbhGxIFcYzGjXxxvJs0oDfzUZni5m9xJziL'; //Plant.ID API Key
 
 const CameraScreen = ({ navigation }) => {
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
@@ -74,7 +74,7 @@ const CameraScreen = ({ navigation }) => {
     }
   };
 
-  const identifyPlant = async () => {
+  const identifyPlant = async () => {  //Plant Id at work
     if (!imageUri) return Alert.alert('Please select or take a photo.');
 
     setLoading(true);
