@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const GEMINI_API_KEY = 'AIzaSyDF7g92xwafnQJcadCWrwiy9vENcRy12XA'; 
-
+//Prompt that the gemini takes to give the answer.
 export const getPlantCareInstructions = async (plantType, temperature) => {
   try {
     if (!plantType || !temperature) {

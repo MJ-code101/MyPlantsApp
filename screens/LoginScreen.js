@@ -41,7 +41,7 @@ const LoginScreen = ({ navigation }) => {
     setPassword('');
   }, []);
 
-  const saveEmail = async (newEmail) => {
+  const saveEmail = async (newEmail) => {  //login saved on local device
     try {
       const storedEmails = await AsyncStorage.getItem('savedEmails');
       let emailList = storedEmails ? JSON.parse(storedEmails) : [];

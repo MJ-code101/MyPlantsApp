@@ -46,7 +46,7 @@ const PlantDetailsScreen = ({ route }) => {
     }
   };
 
-  const formatTime = (date) => {
+  const formatTime = (date) => {   //format of tha reminder clock
     const hours = date.getHours();
     const minutes = date.getMinutes();
     return (
@@ -91,7 +91,7 @@ const PlantDetailsScreen = ({ route }) => {
       console.error('Error scheduling next notification:', error);
     }
   };
-
+//triggertime calculation
   const calculateNextTriggerDate = (offsetDays) => {
     const now = new Date();
     const nextTrigger = new Date(

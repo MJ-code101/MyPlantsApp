@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
 
-const WelcomeScreen = ({ navigation }) => {
+const WelcomeScreen = ({ navigation }) => {  //iamge used for our welcome page
   return (
     <ImageBackground
       source={require('../assets/splash.png')}

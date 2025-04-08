@@ -18,7 +18,7 @@ const MapScreen = () => {
         return;
       }
 
-      const location = await Location.getCurrentPositionAsync({});
+      const location = await Location.getCurrentPositionAsync({});  //Current Location
       const { latitude, longitude } = location.coords;
       setRegion({
         latitude,
@@ -31,7 +31,7 @@ const MapScreen = () => {
     })();
   }, []);
 
-  const fetchStores = async (lat, lon) => {
+  const fetchStores = async (lat, lon) => {  //Get nearby plant stores
     try {
       const res = await axios.get(`https://nominatim.openstreetmap.org/search`, {
         params: {

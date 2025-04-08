@@ -42,7 +42,7 @@ const HomeScreen = ({ navigation }) => {
         }
 
         const location = await Location.getCurrentPositionAsync({});
-        const { latitude, longitude } = location.coords;
+        const { latitude, longitude } = location.coords; // location
         const weatherData = await fetchWeatherData(latitude, longitude);
         setWeather(weatherData);
         generateCareTips(weatherData);
@@ -63,7 +63,7 @@ const HomeScreen = ({ navigation }) => {
     const description = weatherData.weather[0].description.toLowerCase();
 
     const tips = [];
-
+// carousel of tips
     if (temp >15) tips.push('🔥 It’s hot today — water early and avoid direct sun.');
     if (temp < 15) tips.push('❄️ It’s cold — keep tropical plants away from windows.');
     if (humidity < 90) tips.push('💧 Low humidity — consider misting your plants.');
@@ -95,7 +95,7 @@ const HomeScreen = ({ navigation }) => {
 
     return () => unsubscribe();
   }, []);
-
+//logout
   const handleLogout = () => {
     Alert.alert('Logout Confirmation', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },

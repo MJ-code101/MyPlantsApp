@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   TextInput,
@@ -16,6 +16,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { auth } from '../src/firebaseConfig';
+import { useFocusEffect } from '@react-navigation/native';
 
 const db = getFirestore();
 
@@ -32,6 +33,27 @@ const AddPlantScreen = ({ navigation, route }) => {
   const [suggestedRepeatDays, setSuggestedRepeatDays] = useState(
     prefillData.suggestedRepeatDays || '3'
   );
+
+  const scrollRef = useRef(null); // Scroll ref for resetting scroll
+
+  // Scroll to top on screen focus
+  useFocusEffect(
+    React.useCallback(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({ y: 0, animated: false });
+      }
+    }, [])
+  );
+
+  // Update fields if prefillData exists
+  useEffect(() => {
+    if (route?.params?.prefillData) {
+      const { name, type, suggestedRepeatDays } = route.params.prefillData;
+      if (name) setName(name);
+      if (type) setType(type);
+      if (suggestedRepeatDays) setSuggestedRepeatDays(suggestedRepeatDays);
+    }
+  }, [route?.params?.prefillData]);
 
   const handleAddPlant = async () => {
     if (!name || !type || !location) {
@@ -54,10 +76,20 @@ const AddPlantScreen = ({ navigation, route }) => {
         healthStatus,
         needsWater: needsWater === 'yes',
         dateAdded: new Date().toISOString(),
-        imageUri: imageUri || '', // ✅ save image URI
+        imageUri: imageUri || '',
       });
 
       Alert.alert('Success', 'Plant added successfully!');
+
+      // Clear form after adding
+      setName('');
+      setType('');
+      setLocation('');
+      setNotes('');
+      setImageUri('');
+      setHealthStatus('healthy');
+      setNeedsWater('no');
+      setSuggestedRepeatDays('3');
 
       if (needsWater === 'yes') {
         navigation.navigate('PlantDetails', {
@@ -81,7 +113,7 @@ const AddPlantScreen = ({ navigation, route }) => {
       Alert.alert('Error', 'Failed to add plant.');
     }
   };
-
+//permission 
   const handlePickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -106,7 +138,7 @@ const AddPlantScreen = ({ navigation, route }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} ref={scrollRef}>
         <Text style={styles.title}>Add a New Plant</Text>
 
         <TouchableOpacity onPress={handlePickImage} style={styles.imagePicker}>

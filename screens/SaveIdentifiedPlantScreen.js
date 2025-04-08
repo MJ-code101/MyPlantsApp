@@ -89,7 +89,7 @@ const SaveIdentifiedPlantScreen = ({ route, navigation }) => {
       <Button title="Save Plant" onPress={handleSave} />
     </ScrollView>
   );
-};
+}; //save to local phone gallery
 
 const styles = StyleSheet.create({
   container: { padding: 16, backgroundColor: '#f9f9f9', flexGrow: 1 },

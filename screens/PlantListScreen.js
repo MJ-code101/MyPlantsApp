@@ -49,7 +49,7 @@ const PlantListScreen = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
-  const handleDelete = (plantId) => {
+  const handleDelete = (plantId) => {   //hold deletion function
     Alert.alert(
       'Confirm Deletion',
       'Are you sure you want to delete this plant?',
@@ -73,7 +73,7 @@ const PlantListScreen = ({ navigation }) => {
     );
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }) => (   //get uri image as a preview
     <TouchableOpacity
       style={styles.item}
       onPress={() => navigation.navigate('PlantDetails', { plant: item })}
