@@ -104,6 +104,9 @@ const PlantListScreen = ({ navigation }) => {
           <Text style={styles.deleteHint}>
             📌 Tip: Long press a plant to delete it from your list.
           </Text>
+          <Text style={styles.deleteHint}>
+            📌 Tip: Normal press a plant to view more details.
+          </Text>
 
           <FlatList
             data={plants}
@@ -155,7 +158,7 @@ const styles = StyleSheet.create({
   deleteHint: {
     fontSize: 16,
     color: '#666',
-    marginTop: 20,
+    marginTop: 30,
     marginBottom: 12,
     textAlign: 'center',
   },
